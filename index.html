@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Demo — Visit Counter</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --s: #141b24;
+      --t: #f2f5f7;
+      --m: #9aa8b8;
+      --l: rgba(255,255,255,.11);
+      --a: #a6ff4d;
+      --b: #47b5ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--t);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 40px 20px;
+    }
+    .card {
+      background: var(--s);
+      border: 1px solid var(--l);
+      border-radius: 20px;
+      padding: 40px 48px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--a);
+      color: #081004;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 36px;
+      letter-spacing: -.04em;
+      color: var(--t);
+    }
+    p {
+      margin: 0 0 24px;
+      color: var(--m);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .hint {
+      background: rgba(166,255,77,.07);
+      border: 1px solid rgba(166,255,77,.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--a);
+      font-family: monospace;
+    }
+    .hint span { color: var(--m); display: block; margin-bottom: 6px; font-family: sans-serif; font-size: 12px; }
+
+    /* === VISIT COUNTER PANEL === */
+    #visit-counter {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(11,15,20,.95);
+      color: var(--a);
+      border: 1px solid var(--a);
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      z-index: 9999;
+      backdrop-filter: blur(12px);
+      line-height: 1.8;
+      min-width: 210px;
+      box-shadow: 0 8px 32px rgba(166,255,77,.15);
+    }
+    #visit-counter .vc-label {
+      color: var(--m);
+      font-size: 10px;
+      letter-spacing: .12em;
+      margin-bottom: 8px;
+    }
+    #visit-counter .vc-row { color: var(--t); font-size: 13px; }
+    #visit-counter .vc-row strong { color: var(--a); }
+    #visit-counter .vc-reset {
+      display: block;
+      margin-top: 10px;
+      color: var(--m);
+      font-size: 11px;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="badge">DEMO · VISIT COUNTER</div>
+    <h1>Счётчик посещений</h1>
+    <p>Это демо-страница. Счётчик считает все визиты, но показывает панель только владельцу — по секретному URL-параметру.</p>
+    <div class="hint">
+      <span>Открой с этим параметром, чтобы увидеть панель:</span>
+      ?admin=eliseev_admin
+    </div>
+  </div>
+
+  <div class="card" style="font-size:14px; color:var(--m); text-align:left;">
+    <div style="color:var(--a); font-size:11px; letter-spacing:.1em; margin-bottom:12px;">КАК ЭТО РАБОТАЕТ</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>📊 <strong style="color:var(--t)">Считает всех</strong> — каждый визит записывается в localStorage браузера</div>
+      <div>🔒 <strong style="color:var(--t)">Виден только тебе</strong> — панель появляется лишь при <code style="color:var(--a)">?admin=eliseev_admin</code></div>
+      <div>📅 <strong style="color:var(--t)">Сегодня / всего</strong> — счётчик за день сбрасывается автоматически в полночь</div>
+      <div>🗑 <strong style="color:var(--t)">Сброс</strong> — кнопка в панели обнуляет всю статистику</div>
+    </div>
+  </div>
+
+  <!-- VISIT COUNTER PANEL -->
+  <div id="visit-counter">
+    <div class="vc-label">СТАТИСТИКА ПОСЕЩЕНИЙ</div>
+    <div class="vc-row">👁 Всего визитов: <strong id="vc-total">0</strong></div>
+    <div class="vc-row">📅 Сегодня: <strong id="vc-today">0</strong></div>
+    <div class="vc-row">🕐 Последний: <span id="vc-last" style="color:var(--m); font-size:11px;">—</span></div>
+    <button class="vc-reset" id="vc-reset">сбросить счётчик</button>
+  </div>
+
+  <script>
+  (function(){
+    const SECRET = 'eliseev_admin';
+    const params = new URLSearchParams(window.location.search);
+    const today  = new Date().toISOString().slice(0,10);
+
+    // Count every visit
+    let total = parseInt(localStorage.getItem('vc_total') || '0') + 1;
+    localStorage.setItem('vc_total', total);
+
+    let todayCount = 0;
+    if (localStorage.getItem('vc_date') === today) {
+      todayCount = parseInt(localStorage.getItem('vc_today') || '0') + 1;
+    } else {
+      todayCount = 1;
+      localStorage.setItem('vc_date', today);
+    }
+    localStorage.setItem('vc_today', todayCount);
+
+    const now = new Date().toLocaleString('ru-RU');
+    localStorage.setItem('vc_last', now);
+
+    // Show panel only for admin
+    if (params.get('admin') === SECRET) {
+      const panel = document.getElementById('visit-counter');
+      panel.style.display = 'block';
+      document.getElementById('vc-total').textContent = total;
+      document.getElementById('vc-today').textContent = todayCount;
+      document.getElementById('vc-last').textContent  = now;
+      document.getElementById('vc-reset').onclick = function(){
+        ['vc_total','vc_today','vc_date','vc_last'].forEach(k => localStorage.removeItem(k));
+        document.getElementById('vc-total').textContent = '0';
+        document.getElementById('vc-today').textContent = '0';
+        document.getElementById('vc-last').textContent  = '—';
+      };
+    }
+  })();
+  </script>
+
+</body>
+</html>
