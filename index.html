@@ -6,179 +6,362 @@
   <title>Demo — Visit Counter</title>
   <style>
     :root {
-      --bg: #0b0f14;
-      --s: #141b24;
-      --t: #f2f5f7;
-      --m: #9aa8b8;
-      --l: rgba(255,255,255,.11);
-      --a: #a6ff4d;
-      --b: #47b5ff;
+      --bg: #0b0f14; --s: #141b24; --t: #f2f5f7;
+      --m: #9aa8b8; --l: rgba(255,255,255,.11);
+      --a: #a6ff4d; --b: #47b5ff;
     }
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--t);
+      margin: 0; background: var(--bg); color: var(--t);
       font-family: 'Segoe UI', Arial, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      padding: 40px 20px;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 24px; padding: 40px 20px;
     }
     .card {
-      background: var(--s);
-      border: 1px solid var(--l);
-      border-radius: 20px;
-      padding: 40px 48px;
-      max-width: 520px;
-      width: 100%;
-      text-align: center;
+      background: var(--s); border: 1px solid var(--l);
+      border-radius: 20px; padding: 40px 48px;
+      max-width: 560px; width: 100%; text-align: center;
     }
     .badge {
-      display: inline-block;
-      background: var(--a);
-      color: #081004;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .1em;
-      padding: 4px 12px;
-      border-radius: 99px;
-      margin-bottom: 20px;
+      display: inline-block; background: var(--a); color: #081004;
+      font-size: 11px; font-weight: 800; letter-spacing: .1em;
+      padding: 4px 12px; border-radius: 99px; margin-bottom: 20px;
     }
-    h1 {
-      margin: 0 0 12px;
-      font-size: 36px;
-      letter-spacing: -.04em;
-      color: var(--t);
-    }
-    p {
-      margin: 0 0 24px;
-      color: var(--m);
-      font-size: 16px;
-      line-height: 1.6;
-    }
+    h1 { margin: 0 0 12px; font-size: 36px; letter-spacing: -.04em; color: var(--t); }
+    p { margin: 0 0 24px; color: var(--m); font-size: 16px; line-height: 1.6; }
     .hint {
-      background: rgba(166,255,77,.07);
-      border: 1px solid rgba(166,255,77,.25);
-      border-radius: 12px;
-      padding: 14px 18px;
-      font-size: 13px;
-      color: var(--a);
-      font-family: monospace;
+      background: rgba(166,255,77,.07); border: 1px solid rgba(166,255,77,.25);
+      border-radius: 12px; padding: 14px 18px;
+      font-size: 13px; color: var(--a); font-family: monospace;
     }
     .hint span { color: var(--m); display: block; margin-bottom: 6px; font-family: sans-serif; font-size: 12px; }
+    .demo-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+    .demo-btn {
+      padding: 10px 20px; border-radius: 10px; border: 1px solid var(--l);
+      background: rgba(255,255,255,.04); color: var(--t); font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: .2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 7px;
+    }
+    .demo-btn:hover { border-color: var(--a); transform: translateY(-2px); }
+    .demo-btn.tg { background: var(--a); border-color: var(--a); color: #081004; }
 
-    /* === VISIT COUNTER PANEL === */
-    #visit-counter {
-      display: none;
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: rgba(11,15,20,.95);
-      color: var(--a);
-      border: 1px solid var(--a);
-      padding: 14px 18px;
-      border-radius: 14px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      z-index: 9999;
-      backdrop-filter: blur(12px);
-      line-height: 1.8;
-      min-width: 210px;
-      box-shadow: 0 8px 32px rgba(166,255,77,.15);
+    /* ===== ADMIN PANEL ===== */
+    #vc-panel {
+      display: none; position: fixed; bottom: 20px; right: 20px;
+      width: 270px; background: rgba(9,13,18,.97);
+      border: 1px solid var(--a); border-radius: 16px;
+      font-family: 'Courier New', monospace; font-size: 12px;
+      z-index: 9999; backdrop-filter: blur(16px);
+      box-shadow: 0 8px 40px rgba(166,255,77,.18);
+      overflow: hidden; transition: height .25s ease;
     }
-    #visit-counter .vc-label {
-      color: var(--m);
-      font-size: 10px;
-      letter-spacing: .12em;
-      margin-bottom: 8px;
+    #vc-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 1px solid var(--l);
+      cursor: pointer; user-select: none;
     }
-    #visit-counter .vc-row { color: var(--t); font-size: 13px; }
-    #visit-counter .vc-row strong { color: var(--a); }
-    #visit-counter .vc-reset {
-      display: block;
-      margin-top: 10px;
-      color: var(--m);
-      font-size: 11px;
-      cursor: pointer;
-      text-decoration: underline;
-      background: none;
-      border: none;
-      padding: 0;
-      font-family: inherit;
+    #vc-header .vc-title { color: var(--a); font-size: 10px; letter-spacing: .12em; font-weight: 700; }
+    #vc-toggle-btn {
+      background: none; border: none; color: var(--m);
+      font-size: 14px; cursor: pointer; padding: 0; line-height: 1;
     }
+    #vc-body { padding: 12px 14px 14px; }
+    .vc-section { margin-bottom: 10px; }
+    .vc-section-title {
+      color: var(--m); font-size: 9px; letter-spacing: .12em;
+      margin-bottom: 5px; text-transform: uppercase;
+    }
+    .vc-row {
+      display: flex; justify-content: space-between;
+      align-items: center; color: #c8d4de;
+      font-size: 12px; padding: 2px 0;
+    }
+    .vc-row .vc-val { color: var(--a); font-weight: 700; }
+    .vc-row .vc-val.neutral { color: var(--t); }
+    .vc-row .vc-val.small { color: var(--m); font-size: 11px; font-weight: 400; }
+    .vc-divider { border: none; border-top: 1px solid var(--l); margin: 8px 0; }
+    /* sparkline */
+    #vc-spark { display: block; width: 100%; height: 36px; margin: 6px 0 2px; }
+    .vc-spark-label {
+      display: flex; justify-content: space-between;
+      color: var(--m); font-size: 9px; letter-spacing: .04em;
+    }
+    /* click bars */
+    .vc-bar-wrap { margin: 3px 0; }
+    .vc-bar-label { display: flex; justify-content: space-between; color: #c8d4de; font-size: 11px; margin-bottom: 2px; }
+    .vc-bar-label span { color: var(--a); }
+    .vc-bar-track { background: rgba(255,255,255,.06); border-radius: 4px; height: 5px; overflow: hidden; }
+    .vc-bar-fill { height: 100%; border-radius: 4px; background: var(--a); transition: width .4s ease; }
+    /* footer btns */
+    .vc-footer { display: flex; gap: 8px; margin-top: 10px; }
+    .vc-btn {
+      flex: 1; background: none; border: 1px solid var(--l);
+      border-radius: 7px; color: var(--m); font-size: 10px;
+      padding: 5px 0; cursor: pointer; font-family: inherit;
+      transition: .15s;
+    }
+    .vc-btn:hover { border-color: var(--a); color: var(--a); }
+    .vc-btn.danger:hover { border-color: #ff6b6b; color: #ff6b6b; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <div class="badge">DEMO · VISIT COUNTER</div>
-    <h1>Счётчик посещений</h1>
-    <p>Это демо-страница. Счётчик считает все визиты, но показывает панель только владельцу — по секретному URL-параметру.</p>
+    <div class="badge">DEMO · ADMIN PANEL v2</div>
+    <h1>Админ панель</h1>
+    <p>Демо-страница с расширенной статистикой. Визиты, скролл, время на странице, клики по кнопкам, источник перехода, спарклайн за 7 дней.</p>
     <div class="hint">
-      <span>Открой с этим параметром, чтобы увидеть панель:</span>
+      <span>Открой с этим параметром чтобы увидеть панель:</span>
       ?admin=eliseev_admin
     </div>
-  </div>
-
-  <div class="card" style="font-size:14px; color:var(--m); text-align:left;">
-    <div style="color:var(--a); font-size:11px; letter-spacing:.1em; margin-bottom:12px;">КАК ЭТО РАБОТАЕТ</div>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <div>📊 <strong style="color:var(--t)">Считает всех</strong> — каждый визит записывается в localStorage браузера</div>
-      <div>🔒 <strong style="color:var(--t)">Виден только тебе</strong> — панель появляется лишь при <code style="color:var(--a)">?admin=eliseev_admin</code></div>
-      <div>📅 <strong style="color:var(--t)">Сегодня / всего</strong> — счётчик за день сбрасывается автоматически в полночь</div>
-      <div>🗑 <strong style="color:var(--t)">Сброс</strong> — кнопка в панели обнуляет всю статистику</div>
+    <div class="demo-btns">
+      <a class="demo-btn tg" href="https://t.me/farkvad33" target="_blank" data-track="telegram">✈️ Telegram</a>
+      <a class="demo-btn" href="https://hh.ru" target="_blank" data-track="hh">📄 Резюме hh.ru</a>
+      <a class="demo-btn" href="mailto:stanislav.eliseev.30@yandex.ru" data-track="email">✉️ Email</a>
     </div>
   </div>
 
-  <!-- VISIT COUNTER PANEL -->
-  <div id="visit-counter">
-    <div class="vc-label">СТАТИСТИКА ПОСЕЩЕНИЙ</div>
-    <div class="vc-row">👁 Всего визитов: <strong id="vc-total">0</strong></div>
-    <div class="vc-row">📅 Сегодня: <strong id="vc-today">0</strong></div>
-    <div class="vc-row">🕐 Последний: <span id="vc-last" style="color:var(--m); font-size:11px;">—</span></div>
-    <button class="vc-reset" id="vc-reset">сбросить счётчик</button>
+  <!-- ADMIN PANEL -->
+  <div id="vc-panel">
+    <div id="vc-header">
+      <span class="vc-title">📊 АДМИН · СТАТИСТИКА</span>
+      <button id="vc-toggle-btn" title="Свернуть">▾</button>
+    </div>
+    <div id="vc-body">
+
+      <div class="vc-section">
+        <div class="vc-section-title">ВИЗИТЫ</div>
+        <div class="vc-row"><span>👁 Всего</span><span class="vc-val" id="vc-total">0</span></div>
+        <div class="vc-row"><span>📅 Сегодня</span><span class="vc-val" id="vc-today">0</span></div>
+        <div class="vc-row"><span>🕐 Последний</span><span class="vc-val small" id="vc-last">—</span></div>
+        <div class="vc-row"><span>📶 Источник</span><span class="vc-val small" id="vc-ref">—</span></div>
+      </div>
+
+      <hr class="vc-divider">
+
+      <div class="vc-section">
+        <div class="vc-section-title">ТЕКУЩИЙ ВИЗИТ</div>
+        <div class="vc-row"><span>⏱ Время на странице</span><span class="vc-val" id="vc-time">0с</span></div>
+        <div class="vc-row"><span>📉 Глубина скролла</span><span class="vc-val" id="vc-scroll">0%</span></div>
+      </div>
+
+      <hr class="vc-divider">
+
+      <div class="vc-section">
+        <div class="vc-section-title">КЛИКИ ПО КНОПКАМ</div>
+        <div class="vc-bar-wrap">
+          <div class="vc-bar-label">Telegram <span id="cl-telegram">0</span></div>
+          <div class="vc-bar-track"><div class="vc-bar-fill" id="bar-telegram" style="width:0%"></div></div>
+        </div>
+        <div class="vc-bar-wrap">
+          <div class="vc-bar-label">hh.ru <span id="cl-hh">0</span></div>
+          <div class="vc-bar-track"><div class="vc-bar-fill" id="bar-hh" style="width:0%"></div></div>
+        </div>
+        <div class="vc-bar-wrap">
+          <div class="vc-bar-label">Email <span id="cl-email">0</span></div>
+          <div class="vc-bar-track"><div class="vc-bar-fill" id="bar-email" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <hr class="vc-divider">
+
+      <div class="vc-section">
+        <div class="vc-section-title">ВИЗИТЫ ЗА 7 ДНЕЙ</div>
+        <canvas id="vc-spark" width="242" height="36"></canvas>
+        <div class="vc-spark-label">
+          <span id="spark-from">—</span><span id="spark-to">—</span>
+        </div>
+      </div>
+
+      <div class="vc-footer">
+        <button class="vc-btn" id="vc-export">↓ CSV</button>
+        <button class="vc-btn danger" id="vc-reset">сброс</button>
+      </div>
+    </div>
   </div>
 
   <script>
   (function(){
     const SECRET = 'eliseev_admin';
     const params = new URLSearchParams(window.location.search);
-    const today  = new Date().toISOString().slice(0,10);
+    const todayKey = new Date().toISOString().slice(0,10);
 
-    // Count every visit
-    let total = parseInt(localStorage.getItem('vc_total') || '0') + 1;
+    // ---- VISIT COUNTING (runs for everyone) ----
+    let total = parseInt(localStorage.getItem('vc_total')||'0') + 1;
     localStorage.setItem('vc_total', total);
 
     let todayCount = 0;
-    if (localStorage.getItem('vc_date') === today) {
-      todayCount = parseInt(localStorage.getItem('vc_today') || '0') + 1;
+    if (localStorage.getItem('vc_date') === todayKey) {
+      todayCount = parseInt(localStorage.getItem('vc_today')||'0') + 1;
     } else {
       todayCount = 1;
-      localStorage.setItem('vc_date', today);
+      localStorage.setItem('vc_date', todayKey);
     }
     localStorage.setItem('vc_today', todayCount);
 
     const now = new Date().toLocaleString('ru-RU');
     localStorage.setItem('vc_last', now);
 
-    // Show panel only for admin
-    if (params.get('admin') === SECRET) {
-      const panel = document.getElementById('visit-counter');
-      panel.style.display = 'block';
-      document.getElementById('vc-total').textContent = total;
-      document.getElementById('vc-today').textContent = todayCount;
-      document.getElementById('vc-last').textContent  = now;
-      document.getElementById('vc-reset').onclick = function(){
-        ['vc_total','vc_today','vc_date','vc_last'].forEach(k => localStorage.removeItem(k));
-        document.getElementById('vc-total').textContent = '0';
-        document.getElementById('vc-today').textContent = '0';
-        document.getElementById('vc-last').textContent  = '—';
-      };
+    // Sparkline: save daily counts for last 7 days
+    let sparkData = JSON.parse(localStorage.getItem('vc_spark')||'{}');
+    sparkData[todayKey] = todayCount;
+    // keep only last 7 days
+    const sparkKeys = Object.keys(sparkData).sort().slice(-7);
+    const sparkTrimmed = {};
+    sparkKeys.forEach(k => sparkTrimmed[k] = sparkData[k]);
+    localStorage.setItem('vc_spark', JSON.stringify(sparkTrimmed));
+
+    // Referrer
+    const ref = document.referrer
+      ? (new URL(document.referrer).hostname || 'прямой заход')
+      : 'прямой заход';
+    localStorage.setItem('vc_ref', ref);
+
+    // ---- CLICK TRACKING (runs for everyone) ----
+    document.querySelectorAll('[data-track]').forEach(el => {
+      el.addEventListener('click', function(){
+        const key = 'vc_cl_' + this.dataset.track;
+        localStorage.setItem(key, parseInt(localStorage.getItem(key)||'0') + 1);
+      });
+    });
+
+    // ---- SCROLL DEPTH ----
+    let maxScroll = 0;
+    function updateScroll(){
+      const pct = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+      if (pct > maxScroll) {
+        maxScroll = pct;
+        localStorage.setItem('vc_scroll', Math.min(maxScroll, 100));
+      }
     }
+    window.addEventListener('scroll', updateScroll, {passive:true});
+    updateScroll();
+
+    // ---- TIME ON SITE ----
+    const startTime = Date.now();
+    function fmtTime(s){
+      if (s < 60) return s + 'с';
+      return Math.floor(s/60) + 'м ' + (s%60) + 'с';
+    }
+
+    // ---- ADMIN PANEL ----
+    if (params.get('admin') !== SECRET) return;
+
+    const panel = document.getElementById('vc-panel');
+    panel.style.display = 'block';
+
+    // Collapse toggle
+    let collapsed = false;
+    const body = document.getElementById('vc-body');
+    document.getElementById('vc-toggle-btn').onclick = function(e){
+      e.stopPropagation();
+      collapsed = !collapsed;
+      body.style.display = collapsed ? 'none' : 'block';
+      this.textContent = collapsed ? '▴' : '▾';
+    };
+
+    function renderPanel(){
+      document.getElementById('vc-total').textContent = localStorage.getItem('vc_total')||'0';
+      document.getElementById('vc-today').textContent = localStorage.getItem('vc_today')||'0';
+      document.getElementById('vc-last').textContent  = localStorage.getItem('vc_last')||'—';
+      document.getElementById('vc-ref').textContent   = localStorage.getItem('vc_ref')||'—';
+      document.getElementById('vc-scroll').textContent = (localStorage.getItem('vc_scroll')||'0') + '%';
+
+      // Time on site (live)
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById('vc-time').textContent = fmtTime(elapsed);
+
+      // Clicks + bars
+      const tracks = ['telegram','hh','email'];
+      const vals = tracks.map(t => parseInt(localStorage.getItem('vc_cl_'+t)||'0'));
+      const maxVal = Math.max(...vals, 1);
+      tracks.forEach((t, i) => {
+        document.getElementById('cl-'+t).textContent = vals[i];
+        document.getElementById('bar-'+t).style.width = (vals[i]/maxVal*100) + '%';
+      });
+
+      // Sparkline
+      drawSpark();
+    }
+
+    function drawSpark(){
+      const canvas = document.getElementById('vc-spark');
+      const ctx = canvas.getContext('2d');
+      const sd = JSON.parse(localStorage.getItem('vc_spark')||'{}');
+      const keys = Object.keys(sd).sort().slice(-7);
+      const vals = keys.map(k => sd[k]);
+      const W = canvas.width, H = canvas.height;
+      const maxV = Math.max(...vals, 1);
+      ctx.clearRect(0,0,W,H);
+
+      if (vals.length < 2) {
+        ctx.fillStyle = 'rgba(166,255,77,.3)';
+        ctx.fillRect(W/2-1, 0, 2, H);
+        return;
+      }
+
+      // gradient fill
+      const grad = ctx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0, 'rgba(166,255,77,.35)');
+      grad.addColorStop(1, 'rgba(166,255,77,0)');
+
+      const step = W / (vals.length - 1);
+      const pts = vals.map((v,i) => ({ x: i*step, y: H - (v/maxV)*(H-4) - 2 }));
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, H);
+      pts.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(pts[pts.length-1].x, H);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      pts.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.strokeStyle = '#a6ff4d';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // dots
+      pts.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#a6ff4d';
+        ctx.fill();
+      });
+
+      // labels
+      const fmt = d => d.slice(5).replace('-','/');
+      document.getElementById('spark-from').textContent = keys.length ? fmt(keys[0]) : '';
+      document.getElementById('spark-to').textContent   = keys.length ? fmt(keys[keys.length-1]) : '';
+    }
+
+    // Live update every second
+    renderPanel();
+    setInterval(renderPanel, 1000);
+
+    // Export CSV
+    document.getElementById('vc-export').onclick = function(){
+      const sd = JSON.parse(localStorage.getItem('vc_spark')||'{}');
+      let csv = 'date,visits\n';
+      Object.keys(sd).sort().forEach(k => csv += k+','+sd[k]+'\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'visits.csv';
+      a.click();
+    };
+
+    // Reset
+    document.getElementById('vc-reset').onclick = function(){
+      if (!confirm('Сбросить всю статистику?')) return;
+      ['vc_total','vc_today','vc_date','vc_last','vc_ref','vc_scroll','vc_spark',
+       'vc_cl_telegram','vc_cl_hh','vc_cl_email'].forEach(k => localStorage.removeItem(k));
+      renderPanel();
+    };
+
   })();
   </script>
 
